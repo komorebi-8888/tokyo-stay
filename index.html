@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tokyo Stay 2027 · เปรียบเทียบที่พักโตเกียว & โหวตเลือกห้อง (Airbnb)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --airbnb-pink: #FF385C;
+            --airbnb-pink-hover: #E31C5F;
+            --airbnb-black: #222222;
+            --airbnb-gray: #717171;
+            --airbnb-border: #DDDDDD;
+            --airbnb-surface: #F7F7F7;
+        }
+        body {
+            font-family: 'Prompt', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #FFFFFF;
+            color: #222222;
+        }
+        .font-en {
+            font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif;
+        }
+        /* Airbnb Search Pill */
+        .airbnb-search-pill {
+            border: 1px solid #DDDDDD;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+        .airbnb-search-pill:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+        /* Airbnb Luxe Card */
+        .airbnb-card {
+            background: #FFFFFF;
+            border: 1px solid #EBEBEB;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s cubic-bezier(0.2, 0, 0, 1), border-color 0.2s ease;
+        }
+        .airbnb-card:hover {
+            border-color: #DDDDDD;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+        }
+        /* Airbnb Primary Coral Gradient Button */
+        .btn-airbnb-primary {
+            background: linear-gradient(90deg, #E61E4D 0%, #E31C5F 50%, #D70466 100%);
+            color: #FFFFFF;
+            transition: transform 0.12s ease, filter 0.15s ease;
+        }
+        .btn-airbnb-primary:hover {
+            filter: brightness(0.95);
+        }
+        .btn-airbnb-primary:active {
+            transform: scale(0.985);
+        }
+        /* Category Filter Underline */
+        .cat-pill {
+            position: relative;
+            color: #717171;
+            transition: color 0.18s ease;
+        }
+        .cat-pill:hover {
+            color: #222222;
+        }
+        .cat-pill.active {
+            color: #222222;
+            font-weight: 600;
+        }
+        .cat-pill.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #222222;
+            border-radius: 2px;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-slide {
+            animation: fadeSlide 0.22s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-white text-[#222222] antialiased pb-24 selection:bg-[#FF385C]/15 selection:text-[#FF385C]">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-5 left-5 sm:left-auto z-50 hidden sm:max-w-sm bg-[#222222] text-white rounded-2xl px-4 py-3.5 shadow-2xl flex items-center gap-3 animate-fade-slide">
+        <span class="w-6 h-6 rounded-full bg-[#FF385C] text-white flex items-center justify-center shrink-0 text-xs">
+            <i class="fa-solid fa-check"></i>
+        </span>
+        <span id="toast-msg" class="text-xs sm:text-sm font-medium leading-snug">เรียบร้อย</span>
+    </div>
+
+    <!-- LINE Export Modal -->
+    <div id="line-modal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white border border-[#DDDDDD] rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-fade-slide">
+            <div class="flex items-center justify-between border-b border-[#EBEBEB] pb-3.5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-[#06C755]/15 text-[#06C755] flex items-center justify-center text-xl">
+                        <i class="fa-brands fa-line"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-[#222222] text-sm sm:text-base">สรุป Top 3 + ผลโหวต + ลิงก์ Airbnb</h3>
+                        <p class="text-xs text-[#717171]">คัดลอกข้อความแล้ว สามารถกดวางในกลุ่ม LINE ได้เลย</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeLineModal()" aria-label="ปิด"
+                    class="w-8 h-8 rounded-full hover:bg-[#F7F7F7] text-[#222222] flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <textarea id="line-preview-text" rows="12" readonly
+                class="w-full bg-[#F7F7F7] border border-[#DDDDDD] rounded-xl p-3.5 text-xs text-[#222222] leading-relaxed focus:outline-none"></textarea>
+            <div class="flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeLineModal()"
+                    class="px-4 py-2.5 rounded-xl text-xs font-semibold text-[#222222] hover:bg-[#F7F7F7] transition cursor-pointer">
+                    ปิดหน้าต่าง
+                </button>
+                <button type="button" onclick="copyFromModal()"
+                    class="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#06C755] hover:bg-emerald-600 text-white transition inline-flex items-center gap-2 cursor-pointer">
+                    <i class="fa-regular fa-copy"></i> คัดลอกอีกครั้ง
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STICKY GLASSMORPHIC AIRBNB HEADER -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#EBEBEB]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3">
+            
+            <!-- Brand: Airbnb Bela Logo -->
+            <a href="#" class="flex items-center gap-2 text-[#FF385C] shrink-0 group">
+                <svg class="w-8 h-8 fill-current transition-transform duration-200 group-hover:scale-105" viewBox="0 0 32 32" aria-hidden="true">
+                    <path d="M16 1c2.008 0 3.463.963 4.751 3.269l.533 1.025c1.954 3.83 6.114 12.54 7.1 14.836l.145.353c.667 1.591.91 2.472.96 3.396l.01.415.001.228c0 4.062-2.877 6.478-6.357 6.478-2.224 0-4.556-1.258-6.709-3.386l-.257-.26-.172-.179h-.011l-.176.185c-2.044 2.1-4.267 3.42-6.414 3.615l-.28.019-.267.006C5.377 31 2.5 28.584 2.5 24.522l.005-.469c.026-.928.23-1.768.83-3.244l.216-.524c.966-2.298 6.083-12.989 7.707-16.034C12.537 1.963 13.992 1 16 1zm0 2c-1.239 0-2.053.539-2.987 2.21l-.523 1.008c-1.926 3.776-6.06 12.43-7.031 14.692l-.345.836c-.427 1.071-.573 1.655-.605 2.24l-.009.33v.206C4.5 27.395 6.411 29 8.857 29c1.773 0 3.87-1.236 5.831-3.354-2.295-2.938-3.855-6.45-3.855-8.91 0-2.913 1.933-5.386 5.178-5.42 3.223.034 5.156 2.507 5.156 5.42 0 2.456-1.555 5.96-3.855 8.907C19.277 27.766 21.37 29 23.142 29c2.447 0 4.358-1.605 4.358-4.478l-.004-.411c-.019-.672-.17-1.296-.714-2.62l-.248-.6c-1.065-2.478-5.993-12.768-7.538-15.664C18.053 3.539 17.24 3 16 3zm.01 10.316c-2.01.021-3.177 1.514-3.177 3.42 0 1.797 1.18 4.58 2.955 7.044l.21.287.174-.234c1.73-2.385 2.898-5.066 2.989-6.875l.006-.221c0-1.906-1.167-3.4-3.156-3.421h-.001z"></path>
+                </svg>
+                <div class="hidden sm:flex flex-col leading-none">
+                    <span class="font-en font-extrabold text-lg tracking-tight">Tokyo Stay · 2027</span>
+                    <span class="text-[10px] font-semibold text-[#717171] tracking-wider uppercase mt-0.5">Airbnb Top 3 Selection</span>
+                </div>
+            </a>
+
+            <!-- Center: Signature Airbnb Rounded Search Pill -->
+            <div class="airbnb-search-pill bg-white rounded-full py-2 pl-4 pr-2 flex items-center gap-2.5 sm:gap-3.5 max-w-full overflow-hidden">
+                <span class="text-xs font-semibold text-[#222222] truncate">โตเกียว</span>
+                <span class="h-4 w-px bg-[#DDDDDD] shrink-0"></span>
+                <span class="text-xs font-semibold text-[#222222] truncate">27 ก.พ. – 3 มี.ค. 2027</span>
+                <span class="h-4 w-px bg-[#DDDDDD] hidden lg:inline shrink-0"></span>
+                <span class="text-xs text-[#717171] hidden lg:inline truncate">4 ท่าน · งบ ฿27,032</span>
+                <a href="#vote-section" title="ไปยังส่วนลงคะแนน"
+                    class="w-8 h-8 rounded-full bg-[#FF385C] hover:bg-[#E31C5F] text-white flex items-center justify-center shrink-0 transition">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </a>
+            </div>
+
+            <!-- Right: Live USD -> THB Rate Adjuster + Vote Counter -->
+            <div class="flex items-center gap-2 shrink-0">
+                <div class="bg-[#F7F7F7] border border-[#DDDDDD] rounded-full py-1.5 px-2.5 sm:px-3 flex items-center gap-1.5">
+                    <span class="text-[11px] text-[#717171] hidden xl:inline font-medium">เรต $1 =</span>
+                    <button type="button" onclick="stepFx(-0.10)" aria-label="ลดเรตเงิน"
+                        class="w-6 h-6 rounded-full bg-white hover:bg-[#EBEBEB] border border-[#DDDDDD] text-[#222222] flex items-center justify-center transition cursor-pointer">
+                        <i class="fa-solid fa-minus text-[9px]"></i>
+                    </button>
+                    <div class="flex items-center font-en font-bold text-xs text-[#222222]">
+                        <span class="text-[#717171] mr-0.5">฿</span>
+                        <input id="fx-input" type="number" step="0.05" min="20" max="50" value="34.50"
+                            class="w-11 text-center bg-transparent focus:outline-none">
+                    </div>
+                    <button type="button" onclick="stepFx(0.10)" aria-label="เพิ่มเรตเงิน"
+                        class="w-6 h-6 rounded-full bg-white hover:bg-[#EBEBEB] border border-[#DDDDDD] text-[#222222] flex items-center justify-center transition cursor-pointer">
+                        <i class="fa-solid fa-plus text-[9px]"></i>
+                    </button>
+                </div>
+
+                <a href="#vote-section"
+                    class="hidden sm:inline-flex items-center gap-1.5 border border-[#DDDDDD] hover:border-[#222222] bg-white text-[#222222] text-xs font-semibold px-3.5 py-2 rounded-full transition">
+                    <i class="fa-solid fa-heart text-[#FF385C]"></i>
+                    <span>โหวต (<span id="header-vote-count" class="font-en">0/4</span>)</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- CATEGORY FILTER BAR & VIEW MODE TOGGLE -->
+        <div class="border-t border-[#EBEBEB] bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 overflow-x-auto no-scrollbar">
+                <!-- Left: Category Filter Strip -->
+                <div class="flex items-center gap-6 sm:gap-8 pt-3 pb-2">
+                    <button type="button" onclick="setCategory('all')" data-cat="all"
+                        class="cat-pill active flex flex-col items-center gap-1.5 pb-2 shrink-0 cursor-pointer">
+                        <i class="fa-solid fa-border-all text-base"></i>
+                        <span class="text-xs whitespace-nowrap">ทั้งหมด (3 ห้อง)</span>
+                    </button>
+                    <button type="button" onclick="setCategory('disney')" data-cat="disney"
+                        class="cat-pill flex flex-col items-center gap-1.5 pb-2 shrink-0 cursor-pointer">
+                        <i class="fa-brands fa-fort-awesome text-base"></i>
+                        <span class="text-xs whitespace-nowrap">ใกล้ดิสนีย์แลนด์ที่สุด</span>
+                    </button>
+                    <button type="button" onclick="setCategory('elevator')" data-cat="elevator"
+                        class="cat-pill flex flex-col items-center gap-1.5 pb-2 shrink-0 cursor-pointer">
+                        <i class="fa-solid fa-elevator text-base"></i>
+                        <span class="text-xs whitespace-nowrap">มีลิฟต์ขนกระเป๋า</span>
+                    </button>
+                    <button type="button" onclick="setCategory('budget')" data-cat="budget"
+                        class="cat-pill flex flex-col items-center gap-1.5 pb-2 shrink-0 cursor-pointer">
+                        <i class="fa-solid fa-house-chimney text-base"></i>
+                        <span class="text-xs whitespace-nowrap">บ้านเดี่ยวราคาคุ้มสุด</span>
+                    </button>
+                </div>
+
+                <!-- Right: Quick View Switcher ('มุมมองการ์ด (Cards)' vs 'ตารางเทียบสเปก (Table)') -->
+                <div class="flex items-center bg-[#F7F7F7] p-1 rounded-full border border-[#DDDDDD] shrink-0 my-1.5">
+                    <button type="button" onclick="setViewMode('cards')" id="view-btn-cards"
+                        class="px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-[#222222] shadow-xs transition inline-flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-grip text-[11px] text-[#FF385C]"></i>
+                        <span>มุมมองการ์ด (Cards)</span>
+                    </button>
+                    <button type="button" onclick="setViewMode('matrix')" id="view-btn-matrix"
+                        class="px-3 py-1.5 rounded-full text-xs font-semibold text-[#717171] hover:text-[#222222] transition inline-flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-table-columns text-[11px]"></i>
+                        <span>ตารางเทียบสเปก (Table)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-12">
+
+        <!-- VIEW 1: 3-COLUMN LUXURY AIRBNB LISTING CARDS -->
+        <section id="cards-section" aria-label="รายการที่พักโตเกียว 3 ตัวเลือก">
+            <div id="listings-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-7 items-start">
+                <!-- Rendered via JS -->
+            </div>
+        </section>
+
+        <!-- VIEW 2: FULL SIDE-BY-SIDE COMPARISON MATRIX -->
+        <section id="matrix-section" class="hidden animate-fade-slide" aria-label="ตารางเปรียบเทียบสเปกทั้งหมด">
+            <div class="airbnb-card overflow-hidden">
+                <div class="p-5 sm:p-6 border-b border-[#EBEBEB] flex flex-wrap items-center justify-between gap-3 bg-[#F7F7F7]/60">
+                    <div>
+                        <span class="text-xs font-bold text-[#FF385C] uppercase tracking-wider">Side-by-Side Comparison</span>
+                        <h2 class="text-lg sm:text-xl font-bold text-[#222222] mt-0.5">ตารางเปรียบเทียบสเปก & เวลาเดินทางทั้ง 3 ห้อง</h2>
+                    </div>
+                    <button type="button" onclick="setViewMode('cards')"
+                        class="text-xs font-semibold bg-white border border-[#DDDDDD] hover:border-[#222222] px-3.5 py-2 rounded-full transition cursor-pointer">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> กลับสู่มุมมองการ์ดพรีเมียม
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[780px]" id="matrix-table">
+                        <!-- Rendered via JS -->
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTERACTIVE 4-MEMBER GROUP VOTING PANEL -->
+        <section id="vote-section" class="airbnb-card p-5 sm:p-8">
+            <div class="flex flex-wrap items-start justify-between gap-4 pb-6 border-b border-[#EBEBEB]">
+                <div>
+                    <div class="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF385C] mb-1">
+                        <i class="fa-solid fa-heart"></i> ลงคะแนนเสียงสมาชิกทั้ง 4 ท่าน
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-[#222222] tracking-tight">
+                        โหวตเลือกที่พักโตเกียวของทริปเรา
+                    </h2>
+                    <p class="text-xs sm:text-sm text-[#717171] mt-1">
+                        คลิกเลือกห้องที่ชอบในช่องชื่อของตัวเอง (บันทึกอัตโนมัติในเครื่อง) พร้อมพิมพ์เหตุผลสั้นๆ ได้เลย
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                    <button type="button" onclick="clearVotes()"
+                        class="border border-[#DDDDDD] hover:border-[#222222] bg-white text-[#222222] text-xs font-semibold px-4 py-3 rounded-xl transition inline-flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-rotate-left text-[#717171]"></i> ล้างผลโหวต
+                    </button>
+                    <button type="button" onclick="exportToLine()"
+                        class="flex-1 sm:flex-initial justify-center bg-[#06C755] hover:bg-emerald-600 text-white text-xs sm:text-sm font-bold px-5 py-3 rounded-xl transition inline-flex items-center gap-2 cursor-pointer shadow-xs">
+                        <i class="fa-brands fa-line text-lg"></i>
+                        <span>คัดลอกสรุป Top 3 + ผลโหวต + ลิงก์ Airbnb ส่งเข้า LINE</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Live Animated Vote Tally Progress Bars -->
+            <div class="my-6 bg-[#F7F7F7] border border-[#EBEBEB] rounded-2xl p-4 sm:p-5">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <span class="text-xs sm:text-sm font-bold text-[#222222]">
+                        ผลโหวตล่าสุด (<span id="tally-voted" class="font-en text-[#FF385C]">0/4</span> คน)
+                    </span>
+                    <span id="tally-leader" class="text-xs font-semibold bg-white border border-[#DDDDDD] text-[#717171] px-3.5 py-1 rounded-full">
+                        ยังไม่มีผู้ลงคะแนน
+                    </span>
+                </div>
+                <div id="tally-bars" class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+
+            <!-- 4 Member Voting Cards -->
+            <div id="members-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Rendered via JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // ==================== CONFIGURATION & DATA ====================
+        const BUDGET_THB = 27032;
+        const KEY_VOTES = 'airbnb_luxe_tokyo_votes_v3';
+        const KEY_FX = 'airbnb_luxe_tokyo_fx_v3';
+        const KEY_LIKES = 'airbnb_luxe_tokyo_likes_v3';
+
+        const MEMBERS = [
+            { id: 'm1', name: 'สุภัทรา', eng: 'Suphattra' },
+            { id: 'm2', name: 'ณัฐพงศ์', eng: 'Nattapong' },
+            { id: 'm3', name: 'พรประสิทธิ์', eng: 'Phonprasit' },
+            { id: 'm4', name: 'พิมานทิพย์', eng: 'Phimanthip' }
+        ];
+
+        const LISTINGS = [
+            {
+                id: 'opt1',
+                num: 1,
+                category: 'disney',
+                badge: 'ใกล้ดิสนีย์แลนด์ 22 น.',
+                isGuestFavorite: false,
+                rating: '4.82',
+                reviews: '45',
+                title: 'Monzen-nakacho Riverfront 2DK',
+                location: 'Koto City, Tokyo',
+                specsGrid: [
+                    { icon: 'fa-maximize', label: 'ขนาดพื้นที่', value: '49 ตร.ม.' },
+                    { icon: 'fa-bed', label: 'ห้องนอน & เตียง', value: '2 ห้องนอน (4 เตียงใหญ่แยก)' },
+                    { icon: 'fa-shirt', label: 'ซักรีด', value: 'เครื่องซัก + อบผ้า' },
+                    { icon: 'fa-stairs', label: 'การขึ้นลง', value: 'ชั้น 3 ไม่มีลิฟต์' }
+                ],
+                area: '49 ตร.ม.',
+                beds: '4 เตียงใหญ่ (แยกเตียงนอนได้ทุกคน)',
+                elevator: '❌ ไม่มีลิฟต์ (อยู่ชั้น 3)',
+                toilets: '1 ห้องน้ำ (แยกส่วนเปียก/ส้วม)',
+                luggage: 'เช็กอิน 15:00 น. (ล็อกเกอร์ในสถานี)',
+                laundry: '✅ เครื่องซัก + อบแห้งในตัว',
+                usd: 641,
+                url: 'https://th.airbnb.com/rooms/1469803272869239040?adults=4&check_in=2027-02-27&check_out=2027-03-03',
+                pros: [
+                    'กว้าง 49 ตร.ม. แยก 4 เตียงใหญ่นอนสบาย (ห้องละ 2 เตียง)',
+                    'มีเครื่องซัก+อบแห้งในตัว เสื้อผ้าหน้าหนาวแห้งพร้อมใส่',
+                    'โต๊ะกินข้าว 6 ที่นั่ง นั่งรวมตัวคุยกันตอนกลางคืนสบาย',
+                    'เดิน 7-8 นาทีถึงสถานี Monzen-nakacho และ JR Etchujima (ใช้ JR Tokyo Wide Pass ได้เลย)'
+                ],
+                cons: [
+                    'อยู่ชั้น 3 ไม่มีลิฟต์ (ต้องช่วยกันยกกระเป๋า 28 นิ้วขึ้นบันได 2 ชั้นวันเช็กอิน/เช็กเอาท์)',
+                    'มีห้องน้ำ 1 ห้อง (แยกส่วนเปียกและห้องส้วม)'
+                ],
+                routes: [
+                    { dest: '🏰 Tokyo Disneyland', time: '~22 นาที', detail: 'เดิน 7-9 นาทีไป JR Etchujima นั่ง Keiyo Line ตรง 12 นาทีถึง Maihama · ใช้ JR Pass ฟรี 100%' },
+                    { dest: '⛷️ Gala Yuzawa', time: '~95 นาที', detail: 'JR Etchujima 4 นาทีถึง Tokyo Station ต่อชินคันเซ็น · ใช้ JR Pass ฟรี 100%' },
+                    { dest: '🗻 Fuji / Kawaguchiko', time: '~2 ชม. 25 น.', detail: 'ใต้ดิน Toei Oedo Line ต่อเดียว 26 นาทีถึง Shinjuku ต่อรถไฟด่วน Fuji Excursion' },
+                    { dest: '🏮 Ueno / Asakusa / ในเมือง', time: '~13-20 นาที', detail: 'Oedo Line ตรงถึง Ueno-okachimachi 13 นาที · Asakusa 20 นาที' },
+                    { dest: '✈️ สนามบินนาริตะ (ขากลับ)', time: '~70 นาที', detail: 'Oedo Line ไป Ueno-okachimachi ต่อ Keisei Skyliner' }
+                ]
+            },
+            {
+                id: 'opt2',
+                num: 2,
+                category: 'elevator',
+                badge: 'มีลิฟต์ถึงชั้น 4',
+                isGuestFavorite: false,
+                rating: '4.82',
+                reviews: '144',
+                title: 'RZ Hotel Minowa',
+                location: 'Taito City (ใกล้ Ueno)',
+                specsGrid: [
+                    { icon: 'fa-maximize', label: 'ขนาดพื้นที่', value: '35 ตร.ม.' },
+                    { icon: 'fa-bed', label: 'ห้องนอน & เตียง', value: '2 ห้องนอน (2 เตียงใหญ่)' },
+                    { icon: 'fa-elevator', label: 'ลิฟต์ & ซักผ้า', value: 'มีลิฟต์ + เครื่องซักผ้า' },
+                    { icon: 'fa-suitcase-rolling', label: 'ฝากกระเป๋า', value: 'ฝากกระเป๋า 11:00 น.' }
+                ],
+                area: '35 ตร.ม.',
+                beds: '2 เตียงใหญ่ (นอนคู่ห้องละ 2 คน)',
+                elevator: '✅ มีลิฟต์ขึ้นถึงชั้น 2–4',
+                toilets: '1 ห้องน้ำ',
+                luggage: '✅ ฝากกระเป๋าได้ตั้งแต่ 11:00 น.',
+                laundry: '✅ มีเครื่องซักผ้าในห้อง',
+                usd: 646,
+                url: 'https://th.airbnb.com/rooms/1494812199812557199?adults=4&check_in=2027-02-27&check_out=2027-03-03',
+                pros: [
+                    'มีลิฟต์ขึ้นถึงห้อง (ชั้น 2-4) ไม่ต้องแบกกระเป๋าขึ้นบันได',
+                    'เดิน 6 นาทีถึงสถานี Minowa (มีลิฟต์ทั้ง 2 ฝั่ง)',
+                    'นั่งใต้ดิน 2 สถานี (4 นาที) ถึง Ueno ขึ้นชินคันเซ็นและกลับสนามบินเร็วสุด',
+                    'ฝากกระเป๋าก่อนเช็กอินได้ตั้งแต่ 11:00 น. · มี 7-Eleven 24 ชม. ตรงข้ามตึก'
+                ],
+                cons: [
+                    'พื้นที่กะทัดรัด 35 ตร.ม. (วางกระเป๋า 4 ใบพอดีตัว)',
+                    'มี 2 เตียงใหญ่ (นอนคู่ห้องละ 2 คน) · เช็กอิน 16:00 น.'
+                ],
+                routes: [
+                    { dest: '🏰 Tokyo Disneyland', time: '~35 นาที', detail: 'Hibiya Line 16 นาทีถึง Hatchobori ต่อ JR Keiyo Line 12 นาทีถึง Maihama' },
+                    { dest: '⛷️ Gala Yuzawa', time: '~90 นาที', detail: 'Hibiya Line 2 สถานี 4 นาทีถึง Ueno ต่อชินคันเซ็นได้เลย' },
+                    { dest: '🗻 Fuji / Kawaguchiko', time: '~2 ชม. 35 น.', detail: 'Hibiya Line ไป Ueno ต่อ JR Yamanote ไป Shinjuku ขึ้น Fuji Excursion' },
+                    { dest: '🏮 Ueno / Akihabara / Ginza', time: '~4-18 นาที', detail: 'Hibiya Line ต่อเดียวถึง Ueno 4 น., Akihabara 6 น., Ginza 18 น.' },
+                    { dest: '✈️ สนามบินนาริตะ (ขากลับ)', time: '~55 นาที', detail: 'Hibiya Line 4 นาทีถึง Ueno ต่อ Keisei Skyliner ตรงสนามบิน' }
+                ]
+            },
+            {
+                id: 'opt3',
+                num: 3,
+                category: 'budget',
+                badge: 'โดนใจเกสต์ · คุ้มสุด',
+                isGuestFavorite: true,
+                rating: '4.93',
+                reviews: '119',
+                title: 'Sumida Skytree Modern House',
+                location: 'Sumida City (ใกล้ Skytree)',
+                specsGrid: [
+                    { icon: 'fa-maximize', label: 'ขนาดพื้นที่', value: '50 ตร.ม. (บ้าน 2 ชั้น)' },
+                    { icon: 'fa-bed', label: 'ห้องนอน & เตียง', value: '2 ห้องนอน (4 เตียง)' },
+                    { icon: 'fa-house', label: 'รูปแบบที่พัก', value: 'บ้านเดี่ยวทั้งหลัง' },
+                    { icon: 'fa-suitcase-rolling', label: 'ฝากกระเป๋า', value: 'ฝากกระเป๋า 13:00 น.' }
+                ],
+                area: '50 ตร.ม. (บ้านทั้งหลัง 2 ชั้น)',
+                beds: '4 เตียง (1 ใหญ่ + 2 เดี่ยว + โซฟาเบด)',
+                elevator: '⚠️ บ้าน 2 ชั้น (วางกระเป๋าชั้น 1 ได้)',
+                toilets: '1 ห้องน้ำ + 1 ห้องส้วมแยก',
+                luggage: '✅ ฝากกระเป๋าหลัง 13:00 น. ได้',
+                laundry: '✅ เครื่องซักผ้า + ราวตากผ้า',
+                usd: 575,
+                url: 'https://th.airbnb.com/rooms/991639440166515500?adults=4&check_in=2027-02-27&check_out=2027-03-03',
+                pros: [
+                    'ราคาประหยัดที่สุดใน Top 3 (เหลือเงินทอน ~7,194 บาท)',
+                    'ได้บ้านเดี่ยวทั้งหลัง 2 ชั้น 50 ตร.ม. เป็นส่วนตัวสูง',
+                    'รีวิวสูงสุด 4.93★ Guest Favorite · ฝากกระเป๋าหลัง 13:00 น. ได้',
+                    'ใกล้ Skytree (4 น.) & Asakusa (8-13 น.) · ซุปเปอร์มาร์เก็ตเดิน 4 นาที'
+                ],
+                cons: [
+                    'บ้าน 2 ชั้นไม่มีลิฟต์ (ห้องนอนอยู่ชั้น 2 แต่วางกระเป๋าชั้น 1 ได้)',
+                    'สถานี Omurai เป็นสายย่อย Tobu Kameido ต้องนั่ง 4 นาทีไปต่อ JR/ใต้ดิน · เครื่องซักผ้าไม่มีอบแห้งในตัว'
+                ],
+                routes: [
+                    { dest: '🏰 Tokyo Disneyland', time: '~45 นาที', detail: 'Tobu Kameido 4 นาทีถึง Kameido ต่อ JR ไป Tokyo Station และ Keiyo Line ลง Maihama' },
+                    { dest: '⛷️ Gala Yuzawa', time: '~100 นาที', detail: 'Tobu Kameido ไป Kameido ต่อ JR ไป Akihabara/Ueno ขึ้นชินคันเซ็น' },
+                    { dest: '🗻 Fuji / Kawaguchiko', time: '~2 ชม. 35 น.', detail: 'Tobu Kameido ไป Kameido ต่อ JR Chuo-Sobu ตรงถึง Shinjuku ขึ้น Fuji Excursion' },
+                    { dest: '🏮 Tokyo Skytree & Asakusa', time: '~4-13 นาที', detail: 'รถไฟ 4 นาทีถึง Skytree, 8-13 นาทีถึง Asakusa หรือขึ้นบัสหน้าบ้าน 1 นาที' },
+                    { dest: '✈️ สนามบินนาริตะ (ขากลับ)', time: '~60 นาที', detail: 'ไปต่อสาย Keisei Narita Skyaccess Express ที่ Oshiage วิ่งตรงสนามบิน' }
+                ]
+            }
+        ];
+
+        // ==================== STATE ====================
+        let fxRate = parseFloat(localStorage.getItem(KEY_FX)) || 34.50;
+        let selectedCategory = 'all';
+        let viewMode = 'cards'; // 'cards' | 'matrix'
+        let cardTabs = { opt1: 'pros', opt2: 'pros', opt3: 'pros' };
+        let likes = {};
+        let votes = {};
+
+        try { likes = JSON.parse(localStorage.getItem(KEY_LIKES) || '{}'); } catch (e) { likes = {}; }
+        try { votes = JSON.parse(localStorage.getItem(KEY_VOTES) || '{}'); } catch (e) { votes = {}; }
+
+        // ==================== UTILITIES ====================
+        function fmt(num) {
+            return Math.round(num).toLocaleString('en-US');
+        }
+
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            el.classList.remove('hidden');
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => el.classList.add('hidden'), 2800);
+        }
+
+        function copyToClipboard(text, successMessage) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast(successMessage);
+            } catch (err) {
+                showToast('กรุณากดคัดลอกด้วยตนเอง');
+            }
+            document.body.removeChild(ta);
+        }
+
+        function copyListingUrl(optId) {
+            const item = LISTINGS.find(x => x.id === optId);
+            if (!item) return;
+            copyToClipboard(item.url, `คัดลอกลิงก์ Airbnb เบอร์ ${item.num} (${item.title}) แล้ว!`);
+        }
+
+        // ==================== CONTROLS ====================
+        function stepFx(delta) {
+            fxRate = Math.min(50, Math.max(20, +(fxRate + delta).toFixed(2)));
+            document.getElementById('fx-input').value = fxRate.toFixed(2);
+            localStorage.setItem(KEY_FX, fxRate.toString());
+            renderAll();
+        }
+
+        document.getElementById('fx-input').addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            if (!isNaN(val) && val >= 15 && val <= 60) {
+                fxRate = val;
+                localStorage.setItem(KEY_FX, fxRate.toString());
+                renderAll();
+            }
+        });
+
+        function setCategory(cat) {
+            selectedCategory = cat;
+            document.querySelectorAll('.cat-pill').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.cat === cat);
+            });
+            if (viewMode !== 'cards') setViewMode('cards');
+            renderListings();
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            const cardsSec = document.getElementById('cards-section');
+            const matrixSec = document.getElementById('matrix-section');
+            const btnCards = document.getElementById('view-btn-cards');
+            const btnMatrix = document.getElementById('view-btn-matrix');
+
+            if (mode === 'cards') {
+                cardsSec.classList.remove('hidden');
+                matrixSec.classList.add('hidden');
+                btnCards.className = 'px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-[#222222] shadow-xs transition inline-flex items-center gap-1.5 cursor-pointer';
+                btnMatrix.className = 'px-3 py-1.5 rounded-full text-xs font-semibold text-[#717171] hover:text-[#222222] transition inline-flex items-center gap-1.5 cursor-pointer';
+            } else {
+                cardsSec.classList.add('hidden');
+                matrixSec.classList.remove('hidden');
+                btnMatrix.className = 'px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-[#222222] shadow-xs transition inline-flex items-center gap-1.5 cursor-pointer';
+                btnCards.className = 'px-3 py-1.5 rounded-full text-xs font-semibold text-[#717171] hover:text-[#222222] transition inline-flex items-center gap-1.5 cursor-pointer';
+                renderMatrix();
+            }
+        }
+
+        function toggleLike(optId, event) {
+            if (event) event.stopPropagation();
+            likes[optId] = !likes[optId];
+            localStorage.setItem(KEY_LIKES, JSON.stringify(likes));
+            renderListings();
+            const item = LISTINGS.find(x => x.id === optId);
+            if (item && likes[optId]) {
+                showToast(`บันทึก "${item.title}" ลงรายการโปรดแล้ว ❤️`);
+            }
+        }
+
+        function switchCardTab(optId, tab) {
+            cardTabs[optId] = tab;
+            renderListings();
+        }
+
+        // ==================== RENDER LISTING CARDS (NO IMAGES) ====================
+        function renderListings() {
+            const grid = document.getElementById('listings-grid');
+            grid.innerHTML = LISTINGS.map(item => {
+                const isDimmed = selectedCategory !== 'all' && item.category !== selectedCategory;
+                const thbTotal = item.usd * fxRate;
+                const thbPerPerson = thbTotal / 4;
+                const thbSaved = BUDGET_THB - thbTotal;
+                const liked = Boolean(likes[item.id]);
+                const activeTab = cardTabs[item.id] || 'pros';
+
+                const tabContent = activeTab === 'pros'
+                    ? `
+                        <div class="space-y-3 animate-fade-slide">
+                            <div class="space-y-1.5">
+                                <div class="text-[11px] font-bold uppercase tracking-wider text-[#222222] flex items-center gap-1.5">
+                                    <i class="fa-solid fa-circle-check text-emerald-600"></i> จุดเด่นของห้องนี้
+                                </div>
+                                <ul class="space-y-1 text-xs text-[#222222] leading-relaxed">
+                                    ${item.pros.map(p => `<li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span><span>${p}</span></li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="pt-2.5 border-t border-[#EBEBEB] space-y-1.5">
+                                <div class="text-[11px] font-bold uppercase tracking-wider text-[#717171] flex items-center gap-1.5">
+                                    <i class="fa-solid fa-circle-info text-amber-500"></i> ข้อสังเกตที่ควรรู้
+                                </div>
+                                <ul class="space-y-1 text-xs text-[#717171] leading-relaxed">
+                                    ${item.cons.map(c => `<li class="flex items-start gap-2"><span class="text-amber-500 font-bold">•</span><span>${c}</span></li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `
+                    : `
+                        <div class="space-y-2 animate-fade-slide">
+                            ${item.routes.map(r => `
+                                <div class="bg-[#F7F7F7] rounded-xl p-2.5 text-xs">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="font-semibold text-[#222222]">${r.dest}</span>
+                                        <span class="font-en font-bold text-[#222222] bg-white border border-[#DDDDDD] px-2 py-0.5 rounded-full text-[11px] shrink-0">${r.time}</span>
+                                    </div>
+                                    <p class="text-[11px] text-[#717171] mt-1 leading-snug">${r.detail}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+
+                return `
+                    <article class="airbnb-card overflow-hidden flex flex-col justify-between transition-all duration-200 ${isDimmed ? 'opacity-35 scale-[0.99]' : 'opacity-100'}">
+                        <div>
+                            <!-- Clean Typographic Airbnb Header Strip (No Images) -->
+                            <div class="p-5 pb-4 bg-[#F7F7F7]/75 border-b border-[#EBEBEB]">
+                                <div class="flex items-center justify-between gap-2 mb-3">
+                                    <div class="inline-flex items-center gap-1.5 bg-white border border-[#DDDDDD] text-[#222222] text-xs font-bold px-3 py-1 rounded-full shadow-2xs">
+                                        ${item.isGuestFavorite
+                                            ? `<i class="fa-solid fa-award text-[#FF385C]"></i><span>เบอร์ ${item.num} · ${item.badge}</span>`
+                                            : `<span class="w-4 h-4 rounded-full bg-[#222222] text-white font-en text-[10px] flex items-center justify-center">${item.num}</span><span>เบอร์ ${item.num} · ${item.badge}</span>`
+                                        }
+                                    </div>
+
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <div class="flex items-center gap-1 font-en text-xs font-bold text-[#222222] bg-white border border-[#EBEBEB] px-2.5 py-1 rounded-full">
+                                            <i class="fa-solid fa-star text-[11px] text-[#FF385C]"></i>
+                                            <span>${item.rating}</span>
+                                            <span class="text-[#717171] font-normal">(${item.reviews})</span>
+                                        </div>
+                                        <button type="button" onclick="toggleLike('${item.id}', event)" aria-label="ถูกใจห้องนี้"
+                                            class="w-8 h-8 rounded-full bg-white border border-[#EBEBEB] hover:border-[#DDDDDD] flex items-center justify-center transition hover:scale-105 cursor-pointer">
+                                            <i class="fa-${liked ? 'solid' : 'regular'} fa-heart text-sm ${liked ? 'text-[#FF385C]' : 'text-[#717171]'}"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <h2 class="font-en text-lg sm:text-[19px] font-extrabold text-[#222222] leading-snug tracking-tight">
+                                    ${item.title}
+                                </h2>
+                                <p class="text-xs text-[#717171] mt-1 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-location-dot text-[#FF385C]"></i>
+                                    <span>${item.location}</span>
+                                </p>
+                            </div>
+
+                            <!-- Listing Details Body -->
+                            <div class="p-5 space-y-4">
+                                <!-- Dynamic Price & Budget Savings Block -->
+                                <div>
+                                    <div class="flex items-baseline flex-wrap gap-x-2 gap-y-0.5">
+                                        <span class="font-en text-2xl font-extrabold text-[#222222]">$${item.usd} USD</span>
+                                        <span class="text-xs text-[#717171]">รวม 4 คืน</span>
+                                        <span class="font-en text-sm font-bold text-[#FF385C]">(≈ ฿${fmt(thbTotal)})</span>
+                                    </div>
+                                    <div class="flex flex-wrap items-center justify-between gap-2 mt-1.5 text-xs">
+                                        <span class="text-[#717171]">หาร 4 คนตกคนละ <strong class="font-en text-[#222222]">฿${fmt(thbPerPerson)}</strong></span>
+                                        <span class="font-semibold px-2.5 py-0.5 rounded-full ${
+                                            thbSaved >= 0
+                                                ? 'bg-emerald-50 text-emerald-700'
+                                                : 'bg-rose-50 text-[#FF385C]'
+                                        }">
+                                            ${thbSaved >= 0 ? `ประหยัดจากงบ ฿${fmt(thbSaved)}` : `เกินงบ ฿${fmt(Math.abs(thbSaved))}`}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- 2x2 Key Specs Grid -->
+                                <div class="grid grid-cols-2 gap-2 pt-3 border-t border-[#EBEBEB]">
+                                    ${item.specsGrid.map(sp => `
+                                        <div class="bg-[#F7F7F7] rounded-xl p-2.5 border border-[#EBEBEB]/80">
+                                            <div class="text-[10px] font-semibold text-[#717171] flex items-center gap-1.5">
+                                                <i class="fa-solid ${sp.icon} text-[#222222]"></i>
+                                                <span>${sp.label}</span>
+                                            </div>
+                                            <div class="text-xs font-bold text-[#222222] mt-1 leading-snug">${sp.value}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+
+                                <!-- Segmented Tabs: 'จุดเด่น & ข้อสังเกต' vs 'วิธีเดินทาง (5 จุดหมาย)' -->
+                                <div>
+                                    <div class="grid grid-cols-2 bg-[#F7F7F7] p-1 rounded-full border border-[#EBEBEB] mb-3.5">
+                                        <button type="button" onclick="switchCardTab('${item.id}', 'pros')"
+                                            class="py-1.5 px-2.5 rounded-full text-xs font-semibold transition cursor-pointer ${
+                                                activeTab === 'pros'
+                                                    ? 'bg-white text-[#222222] shadow-xs'
+                                                    : 'text-[#717171] hover:text-[#222222]'
+                                            }">
+                                            จุดเด่น & ข้อสังเกต
+                                        </button>
+                                        <button type="button" onclick="switchCardTab('${item.id}', 'routes')"
+                                            class="py-1.5 px-2.5 rounded-full text-xs font-semibold transition cursor-pointer ${
+                                                activeTab === 'routes'
+                                                    ? 'bg-white text-[#222222] shadow-xs'
+                                                    : 'text-[#717171] hover:text-[#222222]'
+                                            }">
+                                            วิธีเดินทาง (5 จุดหมาย)
+                                        </button>
+                                    </div>
+                                    <div>${tabContent}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer: Airbnb Coral CTA + Copy Link Button -->
+                        <div class="px-5 pb-5 pt-1 flex items-center gap-2">
+                            <a href="${item.url}" target="_blank" rel="noopener noreferrer"
+                                class="btn-airbnb-primary flex-1 justify-center text-xs sm:text-sm font-bold py-3 px-4 rounded-xl inline-flex items-center gap-1.5 shadow-xs">
+                                <span>เปิดดูรูป & จองบน Airbnb</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                            </a>
+                            <button type="button" onclick="copyListingUrl('${item.id}')" title="คัดลอกลิงก์"
+                                class="px-3.5 h-11 rounded-xl border border-[#DDDDDD] hover:border-[#222222] bg-white text-[#222222] text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 transition cursor-pointer">
+                                <i class="fa-regular fa-copy"></i>
+                                <span class="hidden sm:inline">คัดลอกลิงก์</span>
+                            </button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        // ==================== RENDER SIDE-BY-SIDE COMPARISON MATRIX ====================
+        function renderMatrix() {
+            const table = document.getElementById('matrix-table');
+            const rows = [
+                {
+                    label: 'ราคาสุทธิ 4 คืน (USD / THB)',
+                    vals: LISTINGS.map(l => `<div class="font-en font-extrabold text-sm text-[#222222]">$${l.usd} USD</div><div class="font-en text-xs font-bold text-[#FF385C]">≈ ฿${fmt(l.usd * fxRate)}</div>`)
+                },
+                {
+                    label: 'เฉลี่ยต่อคน (หาร 4 คน)',
+                    vals: LISTINGS.map(l => `<span class="font-en font-bold text-xs text-[#222222]">฿${fmt((l.usd * fxRate) / 4)} / คน</span>`)
+                },
+                {
+                    label: 'เงินทอนเทียบงบ ฿27,032',
+                    vals: LISTINGS.map(l => {
+                        const saved = BUDGET_THB - l.usd * fxRate;
+                        return `<span class="inline-block text-xs font-bold px-2.5 py-1 rounded-full ${saved >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-[#FF385C]'}">${saved >= 0 ? `ประหยัด ฿${fmt(saved)}` : `เกินงบ ฿${fmt(Math.abs(saved))}`}</span>`;
+                    })
+                },
+                { label: 'คะแนนรีวิว Airbnb', vals: LISTINGS.map(l => `<span class="font-en font-bold text-xs">★ ${l.rating} (${l.reviews} รีวิว)</span>`) },
+                { label: 'ลิฟต์ขนกระเป๋า', vals: LISTINGS.map(l => `<span class="text-xs font-medium">${l.elevator}</span>`) },
+                { label: 'ขนาดพื้นที่', vals: LISTINGS.map(l => `<span class="text-xs font-semibold">${l.area}</span>`) },
+                { label: 'จำนวนเตียงนอน', vals: LISTINGS.map(l => `<span class="text-xs">${l.beds}</span>`) },
+                { label: 'ห้องน้ำ & เครื่องซักผ้า', vals: LISTINGS.map(l => `<div class="text-xs">${l.toilets}</div><div class="text-xs text-[#717171] mt-0.5">${l.laundry}</div>`) },
+                { label: 'การฝากกระเป๋าก่อนเช็กอิน', vals: LISTINGS.map(l => `<span class="text-xs">${l.luggage}</span>`) },
+                { label: '🏰 ไป Tokyo Disneyland', vals: LISTINGS.map(l => `<div class="font-bold text-xs text-[#222222]">${l.routes[0].time}</div><div class="text-[11px] text-[#717171] mt-0.5">${l.routes[0].detail}</div>`) },
+                { label: '⛷️ ไป Gala Yuzawa', vals: LISTINGS.map(l => `<div class="font-bold text-xs text-[#222222]">${l.routes[1].time}</div><div class="text-[11px] text-[#717171] mt-0.5">${l.routes[1].detail}</div>`) },
+                { label: '🗻 ไป Mt. Fuji / Kawaguchiko', vals: LISTINGS.map(l => `<div class="font-bold text-xs text-[#222222]">${l.routes[2].time}</div><div class="text-[11px] text-[#717171] mt-0.5">${l.routes[2].detail}</div>`) },
+                { label: '✈️ ขากลับสนามบินนาริตะ', vals: LISTINGS.map(l => `<div class="font-bold text-xs text-[#222222]">${l.routes[4].time}</div><div class="text-[11px] text-[#717171] mt-0.5">${l.routes[4].detail}</div>`) },
+                {
+                    label: 'ลิงก์จอง Airbnb',
+                    vals: LISTINGS.map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer" class="btn-airbnb-primary inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl">เปิดดูห้องจริง <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>`)
+                }
+            ];
+
+            table.innerHTML = `
+                <thead>
+                    <tr class="border-b border-[#DDDDDD] bg-white">
+                        <th class="p-4 text-xs font-bold text-[#717171] uppercase tracking-wider w-48">หัวข้อเปรียบเทียบ</th>
+                        ${LISTINGS.map(l => `
+                            <th class="p-4 align-top">
+                                <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#FF385C]/10 text-[#FF385C] mb-1">เบอร์ ${l.num} · ${l.badge}</span>
+                                <div class="font-en text-sm font-bold text-[#222222]">${l.title}</div>
+                            </th>
+                        `).join('')}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#EBEBEB]">
+                    ${rows.map(r => `
+                        <tr class="hover:bg-[#F7F7F7]/60 transition">
+                            <td class="p-4 text-xs font-bold text-[#222222] bg-[#F7F7F7]/40 align-top">${r.label}</td>
+                            ${r.vals.map(v => `<td class="p-4 align-top">${v}</td>`).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+
+        // ==================== VOTING SYSTEM ====================
+        function saveVotes() {
+            try { localStorage.setItem(KEY_VOTES, JSON.stringify(votes)); } catch (e) {}
+        }
+
+        function pickVote(memberId, optId) {
+            if (!votes[memberId]) votes[memberId] = { choice: null, note: '' };
+            votes[memberId].choice = votes[memberId].choice === optId ? null : optId;
+            saveVotes();
+            renderVoting();
+
+            const m = MEMBERS.find(x => x.id === memberId);
+            const l = LISTINGS.find(x => x.id === optId);
+            if (votes[memberId].choice && m && l) {
+                showToast(`${m.name} เลือกเบอร์ ${l.num} (${l.title}) แล้ว`);
+            }
+        }
+
+        function saveNote(memberId, note) {
+            if (!votes[memberId]) votes[memberId] = { choice: null, note: '' };
+            votes[memberId].note = note;
+            saveVotes();
+        }
+
+        function clearVotes() {
+            votes = {};
+            saveVotes();
+            renderVoting();
+            showToast('ล้างคะแนนโหวตทั้งหมดเรียบร้อย');
+        }
+
+        function renderVoting() {
+            const counts = { opt1: 0, opt2: 0, opt3: 0 };
+            let totalVoted = 0;
+
+            MEMBERS.forEach(m => {
+                const c = votes[m.id]?.choice;
+                if (c && counts[c] !== undefined) {
+                    counts[c]++;
+                    totalVoted++;
+                }
+            });
+
+            document.getElementById('header-vote-count').textContent = `${totalVoted}/4`;
+            document.getElementById('tally-voted').textContent = `${totalVoted}/4`;
+
+            const leaderBadge = document.getElementById('tally-leader');
+            const maxVotes = Math.max(counts.opt1, counts.opt2, counts.opt3);
+
+            if (maxVotes === 0) {
+                leaderBadge.className = 'text-xs font-semibold bg-white border border-[#DDDDDD] text-[#717171] px-3.5 py-1 rounded-full';
+                leaderBadge.textContent = 'ยังไม่มีผู้ลงคะแนน';
+            } else {
+                const winners = LISTINGS.filter(l => counts[l.id] === maxVotes);
+                if (winners.length === 1) {
+                    leaderBadge.className = 'text-xs font-bold bg-[#FF385C] text-white px-3.5 py-1 rounded-full shadow-2xs';
+                    leaderBadge.textContent = `🏆 คะแนนนำ: เบอร์ ${winners[0].num} (${winners[0].title})`;
+                } else {
+                    leaderBadge.className = 'text-xs font-bold bg-[#222222] text-white px-3.5 py-1 rounded-full';
+                    leaderBadge.textContent = `🤝 เสมอกันอยู่ที่ ${maxVotes} เสียง`;
+                }
+            }
+
+            // Progress Tally Cards
+            document.getElementById('tally-bars').innerHTML = LISTINGS.map(l => {
+                const c = counts[l.id];
+                const pct = Math.round((c / 4) * 100);
+                const voters = MEMBERS.filter(m => votes[m.id]?.choice === l.id).map(m => m.name);
+                return `
+                    <div class="bg-white border border-[#EBEBEB] rounded-xl p-3.5">
+                        <div class="flex items-center justify-between text-xs font-bold text-[#222222] mb-2">
+                            <span class="truncate pr-2">เบอร์ ${l.num} · ${l.title}</span>
+                            <span class="font-en shrink-0">${c}/4 เสียง</span>
+                        </div>
+                        <div class="w-full h-2 bg-[#EBEBEB] rounded-full overflow-hidden">
+                            <div class="h-full bg-[#FF385C] transition-all duration-300 rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                        <div class="text-[11px] text-[#717171] mt-2 truncate">
+                            ${voters.length ? `เลือกโดย: <strong class="text-[#222222]">${voters.join(', ')}</strong>` : 'ยังไม่มีคนเลือก'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 4 Member Voting Cards
+            document.getElementById('members-grid').innerHTML = MEMBERS.map(m => {
+                const v = votes[m.id] || { choice: null, note: '' };
+                const voted = Boolean(v.choice);
+
+                const buttons = LISTINGS.map(l => {
+                    const active = v.choice === l.id;
+                    const thb = fmt(l.usd * fxRate);
+                    return `
+                        <button type="button" onclick="pickVote('${m.id}', '${l.id}')"
+                            class="w-full text-left px-3 py-2.5 rounded-xl border text-xs transition cursor-pointer flex items-center justify-between gap-2 ${
+                                active
+                                    ? 'bg-[#222222] border-[#222222] text-white font-semibold shadow-xs'
+                                    : 'bg-white hover:bg-[#F7F7F7] border-[#DDDDDD] text-[#222222]'
+                            }">
+                            <div class="min-w-0">
+                                <div class="truncate">เบอร์ ${l.num} · ${l.title}</div>
+                                <div class="font-en text-[11px] ${active ? 'text-white/75' : 'text-[#717171]'}">≈ ฿${thb}</div>
+                            </div>
+                            <i class="fa-solid ${active ? 'fa-circle-check text-[#FF385C] text-base' : 'fa-circle text-[#DDDDDD] text-sm'} shrink-0"></i>
+                        </button>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="border ${voted ? 'border-[#222222]' : 'border-[#DDDDDD]'} rounded-2xl p-4 bg-white flex flex-col justify-between gap-3 transition-colors">
+                        <div>
+                            <div class="flex items-center justify-between pb-2.5 mb-3 border-b border-[#EBEBEB]">
+                                <div>
+                                    <div class="font-bold text-sm text-[#222222]">${m.name}</div>
+                                    <div class="font-en text-[11px] text-[#717171]">${m.eng}</div>
+                                </div>
+                                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
+                                    voted ? 'bg-[#FF385C]/10 text-[#FF385C]' : 'bg-[#F7F7F7] text-[#717171]'
+                                }">
+                                    ${voted ? 'โหวตแล้ว' : 'รอโหวต'}
+                                </span>
+                            </div>
+                            <div class="space-y-2">${buttons}</div>
+                        </div>
+
+                        <input type="text"
+                            placeholder="เหตุผลสั้นๆ (ถ้ามี)..."
+                            value="${(v.note || '').replace(/"/g, '&quot;')}"
+                            onchange="saveNote('${m.id}', this.value)"
+                            class="w-full text-xs bg-[#F7F7F7] border border-transparent focus:border-[#222222] focus:bg-white rounded-xl px-3 py-2 text-[#222222] placeholder:text-[#717171] focus:outline-none transition">
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== LINE SUMMARY EXPORT ====================
+        function buildLineSummary() {
+            const lines = [];
+            lines.push('🏠 โหวตที่พักโตเกียว (Airbnb Top 3 Finalists)');
+            lines.push('📅 27 ก.พ. – 3 มี.ค. 2027 (4 คืน · 4 คน)');
+            lines.push(`💰 งบกองกลาง: ฿${fmt(BUDGET_THB)} (เรต $1 = ฿${fxRate.toFixed(2)})`);
+            lines.push('────────────────────');
+
+            LISTINGS.forEach(l => {
+                const thb = fmt(l.usd * fxRate);
+                const saved = fmt(BUDGET_THB - l.usd * fxRate);
+                lines.push(`${l.num}️⃣ เบอร์ ${l.num}: ${l.title}`);
+                lines.push(`   • ราคา: $${l.usd} USD (≈ ฿${thb} · ประหยัด ฿${saved})`);
+                lines.push(`   • จุดเด่น: ${l.badge} · ★ ${l.rating}`);
+                lines.push(`   • ลิงก์: ${l.url}`);
+                lines.push('');
+            });
+
+            lines.push('────────────────────');
+            lines.push('🗳️ ผลโหวตล่าสุด:');
+            MEMBERS.forEach(m => {
+                const v = votes[m.id];
+                const pick = v?.choice ? LISTINGS.find(x => x.id === v.choice) : null;
+                const note = v?.note && v.note.trim() ? ` (${v.note.trim()})` : '';
+                lines.push(pick
+                    ? `• ${m.name}: เลือกเบอร์ ${pick.num} (${pick.title})${note}`
+                    : `• ${m.name}: รอโหวต`
+                );
+            });
+            lines.push('────────────────────');
+            lines.push('กดดูรูปในลิงก์แล้วพิมพ์เลือกเบอร์ 1, 2 หรือ 3 ได้เลยจ้า 🙌');
+            return lines.join('\n');
+        }
+
+        function exportToLine() {
+            const text = buildLineSummary();
+            document.getElementById('line-preview-text').value = text;
+            document.getElementById('line-modal').classList.remove('hidden');
+            copyToClipboard(text, 'คัดลอกสรุป Top 3 + ผลโหวต + ลิงก์ Airbnb เรียบร้อยแล้ว!');
+        }
+
+        function closeLineModal() {
+            document.getElementById('line-modal').classList.add('hidden');
+        }
+
+        function copyFromModal() {
+            copyToClipboard(document.getElementById('line-preview-text').value, 'คัดลอกข้อความส่งเข้า LINE แล้ว!');
+            closeLineModal();
+        }
+
+        // ==================== INITIALIZE ====================
+        function renderAll() {
+            renderListings();
+            renderVoting();
+            if (viewMode === 'matrix') renderMatrix();
+        }
+
+        document.getElementById('fx-input').value = fxRate.toFixed(2);
+        renderAll();
+    </script>
+</body>
+</html>
